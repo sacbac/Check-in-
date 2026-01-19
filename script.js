@@ -1,7 +1,6 @@
 let selectedMood = null;
 let userAccount = null;
 
-// ✅ YOUR DEPLOYED CONTRACT
 const CONTRACT_ADDRESS = "0x730f889F90b0DbCB295704d05f8CD96c5514b1F5";
 
 const CONTRACT_ABI = [
@@ -13,8 +12,7 @@ function init() {
     new Date().toLocaleDateString("en-US", {
       weekday: "long",
       month: "long",
-      day: "numeric",
-      year: "numeric"
+      day: "numeric"
     });
 
   document
@@ -34,10 +32,12 @@ async function connectWallet() {
 
   userAccount = accounts[0];
 
-  document.getElementById("connectWalletBtn").textContent = "✅ Connected";
-  document.getElementById("walletAddress").textContent =
-    `Wallet: ${userAccount.slice(0, 6)}...${userAccount.slice(-4)}`;
-  document.getElementById("walletAddress").classList.remove("hidden");
+  document.getElementById("connectWalletBtn").textContent =
+    "✅ Wallet Connected";
+
+  const addr = document.getElementById("walletAddress");
+  addr.textContent = `${userAccount.slice(0, 6)}...${userAccount.slice(-4)}`;
+  addr.classList.remove("hidden");
 }
 
 function selectMood(mood, event) {
@@ -49,27 +49,24 @@ function selectMood(mood, event) {
 }
 
 async function submitCheckIn() {
-  if (!userAccount) {
-    alert("Connect wallet first");
-    return;
-  }
+  if (!userAccount) return alert("Connect wallet first");
+  if (!selectedMood) return alert("Select a mood");
 
-  if (!selectedMood) {
-    alert("Select a mood");
-    return;
-  }
+  toggleLoading(true);
 
   try {
     await mintNFT();
     showSuccess();
   } catch (err) {
     if (err.reason?.includes("Already minted")) {
-      alert("❌ You already checked in today. Come back tomorrow!");
+      alert("You already checked in today 🌙");
     } else {
-      console.error(err);
       alert("Transaction failed");
+      console.error(err);
     }
   }
+
+  toggleLoading(false);
 }
 
 async function mintNFT() {
@@ -99,18 +96,23 @@ async function mintNFT() {
   await tx.wait();
 }
 
+function toggleLoading(state) {
+  document.getElementById("checkInForm").classList.toggle("hidden", state);
+  document.getElementById("loadingState").classList.toggle("hidden", !state);
+  document.getElementById("checkInBtn").disabled = state;
+}
+
 function showSuccess() {
-  document.getElementById("checkInForm").classList.add("hidden");
   document.getElementById("successMessage").classList.remove("hidden");
 
   setTimeout(() => {
-    document.getElementById("checkInForm").classList.remove("hidden");
     document.getElementById("successMessage").classList.add("hidden");
+    document.getElementById("checkInForm").classList.remove("hidden");
     selectedMood = null;
     document.querySelectorAll(".mood-btn").forEach(btn =>
       btn.classList.remove("selected")
     );
-  }, 3000);
+  }, 2500);
 }
 
 init();
