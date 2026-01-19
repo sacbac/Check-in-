@@ -2,143 +2,28 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
+  <meta
+    name="viewport"
+    content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no"
+  />
 
-  <!-- 🔥 MOBILE FIRST -->
-  <meta name="viewport"
-        content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" />
-
-  <!-- Base Mini App -->
   <meta name="base:app_id" content="695f88a93ee38216e9af4d08" />
 
   <title>Daily Check-In</title>
 
-  <!-- Ethers -->
+  <!-- Styles -->
+  <link rel="stylesheet" href="style.css" />
+
+  <!-- ethers.js -->
   <script src="https://cdn.jsdelivr.net/npm/ethers@6.9.0/dist/ethers.umd.min.js"></script>
-
-  <style>
-    :root {
-      --bg: #020617;
-      --card: #0f172a;
-      --primary: #38bdf8;
-      --success: #22c55e;
-      --text: #e5e7eb;
-    }
-
-    * {
-      box-sizing: border-box;
-      -webkit-tap-highlight-color: transparent;
-    }
-
-    body {
-      margin: 0;
-      padding: env(safe-area-inset-top)
-               env(safe-area-inset-right)
-               env(safe-area-inset-bottom)
-               env(safe-area-inset-left);
-      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto;
-      background: linear-gradient(180deg, #020617, #020617);
-      color: var(--text);
-    }
-
-    .app {
-      max-width: 420px;
-      margin: auto;
-      padding: 16px;
-      min-height: 100vh;
-      display: flex;
-      flex-direction: column;
-    }
-
-    h2 {
-      text-align: center;
-      font-size: 20px;
-      margin: 12px 0 20px;
-      opacity: 0.9;
-    }
-
-    .card {
-      background: var(--card);
-      border-radius: 20px;
-      padding: 20px;
-      box-shadow: 0 10px 30px rgba(0,0,0,0.4);
-    }
-
-    .wallet {
-      text-align: center;
-      margin-bottom: 14px;
-    }
-
-    .wallet button {
-      width: 100%;
-      padding: 14px;
-      border-radius: 14px;
-      border: none;
-      background: var(--primary);
-      font-size: 16px;
-      font-weight: 600;
-    }
-
-    .wallet p {
-      font-size: 14px;
-      margin-top: 8px;
-      opacity: 0.7;
-    }
-
-    .moods {
-      display: grid;
-      grid-template-columns: repeat(2, 1fr);
-      gap: 12px;
-      margin-top: 10px;
-    }
-
-    .mood-btn {
-      padding: 18px 0;
-      border-radius: 16px;
-      font-size: 18px;
-      border: none;
-      background: #020617;
-      color: var(--text);
-      transition: transform 0.1s, background 0.1s;
-    }
-
-    .mood-btn:active {
-      transform: scale(0.96);
-    }
-
-    .mood-btn.selected {
-      background: var(--primary);
-      color: #020617;
-      font-weight: 600;
-    }
-
-    #checkInBtn {
-      margin-top: 16px;
-      padding: 16px;
-      border-radius: 16px;
-      border: none;
-      background: var(--success);
-      font-size: 18px;
-      font-weight: 700;
-      width: 100%;
-    }
-
-    .success {
-      text-align: center;
-      padding: 40px 20px;
-    }
-
-    .hidden {
-      display: none;
-    }
-  </style>
 </head>
 
 <body>
   <div class="app">
-
-    <h2 id="todayDate"></h2>
-
     <div class="card">
+
+      <h1>Daily Check-In</h1>
+      <div class="date" id="todayDate"></div>
 
       <div class="wallet">
         <button id="connectWalletBtn">🔐 Connect Wallet</button>
@@ -146,25 +31,36 @@
       </div>
 
       <div id="checkInForm">
-        <h3 style="text-align:center;margin-bottom:10px;">
-          How are you feeling today?
-        </h3>
+        <div class="section-title">How are you feeling today?</div>
 
         <div class="moods">
-          <button class="mood-btn" onclick="selectMood('Happy', event)">😊 Happy</button>
-          <button class="mood-btn" onclick="selectMood('Calm', event)">😌 Calm</button>
-          <button class="mood-btn" onclick="selectMood('Focused', event)">🎯 Focused</button>
-          <button class="mood-btn" onclick="selectMood('Tired', event)">😴 Tired</button>
+          <button class="mood-btn" onclick="selectMood('Happy', event)">
+            😊 <span>Happy</span>
+          </button>
+          <button class="mood-btn" onclick="selectMood('Calm', event)">
+            😌 <span>Calm</span>
+          </button>
+          <button class="mood-btn" onclick="selectMood('Focused', event)">
+            🎯 <span>Focused</span>
+          </button>
+          <button class="mood-btn" onclick="selectMood('Tired', event)">
+            😴 <span>Tired</span>
+          </button>
         </div>
 
         <button id="checkInBtn" onclick="submitCheckIn()">
-          ✨ Check In & Mint NFT
+          ✨ Check-In & Mint NFT
         </button>
       </div>
 
-      <div id="successMessage" class="success hidden">
+      <div id="loadingState" class="center hidden">
+        <div class="spinner"></div>
+        <p>Minting your NFT…</p>
+      </div>
+
+      <div id="successMessage" class="center hidden">
         <h3>✅ NFT Minted</h3>
-        <p>Come back tomorrow 🌱</p>
+        <p class="muted">Come back tomorrow 🌱</p>
       </div>
 
     </div>
