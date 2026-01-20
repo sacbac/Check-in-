@@ -1,0 +1,25 @@
+{
+  "accountAssociation": {
+    "header": "",
+    "payload": "",
+    "signature": ""
+  },
+  "miniapp": {
+    "version": "1",
+    "name": "Daily Check-In NFT",
+    "homeUrl": "https://your-domain.com",
+    "iconUrl": "https://your-domain.com/icon.png",
+    "splashImageUrl": "https://your-domain.com/splash.png",
+    "splashBackgroundColor": "#000000",
+    "subtitle": "Mint an NFT daily!",
+    "description": "Track your mood and mint a unique NFT every day.",
+    "screenshotUrls": [
+      "https://your-domain.com/screenshot1.png",
+      "https://your-domain.com/screenshot2.png"
+    ],
+    "primaryCategory": "productivity",
+    "tags": ["mood", "checkin", "nft"],
+    "heroImageUrl": "https://your-domain.com/og.png",
+    "tagline": "Make your mood onchain"
+  }
+}

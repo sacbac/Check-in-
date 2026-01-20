@@ -1,3 +1,16 @@
+import { sdk } from "@farcaster/miniapp-sdk";
+
+async function baseReady() {
+  try {
+    await sdk.actions.ready();
+    console.log("Mini App ready in Base client");
+  } catch (e) {
+    console.warn("Not in Mini App environment");
+  }
+}
+
+baseReady();
+
 let selectedMood = null;
 let userAccount = null;
 
