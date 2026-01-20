@@ -1,10 +1,10 @@
 let selectedMood = null;
 let userAccount = null;
 
-// ✅ Your deployed contract on Base Mainnet
+// ✅ Your Base Mainnet contract
 const CONTRACT_ADDRESS = "0x730f889F90b0DbCB295704d05f8CD96c5514b1F5";
 
-// Base Mainnet chainId
+// Base Mainnet
 const BASE_CHAIN_ID = "0x2105";
 
 const CONTRACT_ABI = [
@@ -24,56 +24,27 @@ function init() {
     .addEventListener("click", connectWallet);
 }
 
-/* 🔁 AUTO SWITCH TO BASE */
-async function switchToBase() {
-  try {
-    await ethereum.request({
-      method: "wallet_switchEthereumChain",
-      params: [{ chainId: BASE_CHAIN_ID }]
-    });
-  } catch (err) {
-    // Base not added yet
-    if (err.code === 4902) {
-      await ethereum.request({
-        method: "wallet_addEthereumChain",
-        params: [
-          {
-            chainId: BASE_CHAIN_ID,
-            chainName: "Base Mainnet",
-            nativeCurrency: {
-              name: "Ethereum",
-              symbol: "ETH",
-              decimals: 18
-            },
-            rpcUrls: ["https://mainnet.base.org"],
-            blockExplorerUrls: ["https://basescan.org"]
-          }
-        ]
-      });
-    } else {
-      throw err;
-    }
-  }
-}
-
+/* STEP 1: CONNECT WALLET */
 async function connectWallet() {
   if (!window.ethereum) {
-    alert("Please install MetaMask");
+    alert("MetaMask not detected. Open in MetaMask browser.");
     return;
   }
 
   try {
-    // 🔁 Ensure Base network
-    await switchToBase();
-
-    const accounts = await ethereum.request({
+    // ✅ First request accounts
+    const accounts = await window.ethereum.request({
       method: "eth_requestAccounts"
     });
 
     userAccount = accounts[0];
 
+    // ✅ Then ensure Base network
+    await ensureBaseNetwork();
+
+    // ✅ Update UI
     document.getElementById("connectWalletBtn").textContent =
-      "✅ Wallet Connected (Base)";
+      "✅ Connected (Base)";
 
     const addr = document.getElementById("walletAddress");
     addr.textContent =
@@ -81,8 +52,38 @@ async function connectWallet() {
     addr.classList.remove("hidden");
 
   } catch (err) {
-    console.error(err);
-    alert("Wallet connection cancelled");
+    console.error("Wallet connect error:", err);
+    alert("Wallet connection cancelled or failed");
+  }
+}
+
+/* STEP 2: ENSURE BASE NETWORK */
+async function ensureBaseNetwork() {
+  try {
+    await window.ethereum.request({
+      method: "wallet_switchEthereumChain",
+      params: [{ chainId: BASE_CHAIN_ID }]
+    });
+  } catch (err) {
+    // Chain not added
+    if (err.code === 4902) {
+      await window.ethereum.request({
+        method: "wallet_addEthereumChain",
+        params: [{
+          chainId: BASE_CHAIN_ID,
+          chainName: "Base Mainnet",
+          nativeCurrency: {
+            name: "Ethereum",
+            symbol: "ETH",
+            decimals: 18
+          },
+          rpcUrls: ["https://mainnet.base.org"],
+          blockExplorerUrls: ["https://basescan.org"]
+        }]
+      });
+    } else {
+      throw err;
+    }
   }
 }
 
@@ -107,8 +108,8 @@ async function submitCheckIn() {
     if (err.reason?.includes("Already minted")) {
       alert("You already checked in today 🌙");
     } else {
-      alert("Transaction failed");
       console.error(err);
+      alert("Transaction failed");
     }
   }
 
@@ -163,7 +164,3 @@ function showSuccess() {
 
 init();
 
-  }, 2500);
-}
-
-init();
