@@ -1,7 +1,11 @@
 let selectedMood = null;
 let userAccount = null;
 
+// ✅ Your deployed contract on Base Mainnet
 const CONTRACT_ADDRESS = "0x730f889F90b0DbCB295704d05f8CD96c5514b1F5";
+
+// Base Mainnet chainId
+const BASE_CHAIN_ID = "0x2105";
 
 const CONTRACT_ABI = [
   "function mintCheckInNFT(address to, string tokenURI)"
@@ -20,24 +24,66 @@ function init() {
     .addEventListener("click", connectWallet);
 }
 
+/* 🔁 AUTO SWITCH TO BASE */
+async function switchToBase() {
+  try {
+    await ethereum.request({
+      method: "wallet_switchEthereumChain",
+      params: [{ chainId: BASE_CHAIN_ID }]
+    });
+  } catch (err) {
+    // Base not added yet
+    if (err.code === 4902) {
+      await ethereum.request({
+        method: "wallet_addEthereumChain",
+        params: [
+          {
+            chainId: BASE_CHAIN_ID,
+            chainName: "Base Mainnet",
+            nativeCurrency: {
+              name: "Ethereum",
+              symbol: "ETH",
+              decimals: 18
+            },
+            rpcUrls: ["https://mainnet.base.org"],
+            blockExplorerUrls: ["https://basescan.org"]
+          }
+        ]
+      });
+    } else {
+      throw err;
+    }
+  }
+}
+
 async function connectWallet() {
   if (!window.ethereum) {
     alert("Please install MetaMask");
     return;
   }
 
-  const accounts = await ethereum.request({
-    method: "eth_requestAccounts"
-  });
+  try {
+    // 🔁 Ensure Base network
+    await switchToBase();
 
-  userAccount = accounts[0];
+    const accounts = await ethereum.request({
+      method: "eth_requestAccounts"
+    });
 
-  document.getElementById("connectWalletBtn").textContent =
-    "✅ Wallet Connected";
+    userAccount = accounts[0];
 
-  const addr = document.getElementById("walletAddress");
-  addr.textContent = `${userAccount.slice(0, 6)}...${userAccount.slice(-4)}`;
-  addr.classList.remove("hidden");
+    document.getElementById("connectWalletBtn").textContent =
+      "✅ Wallet Connected (Base)";
+
+    const addr = document.getElementById("walletAddress");
+    addr.textContent =
+      `${userAccount.slice(0, 6)}...${userAccount.slice(-4)}`;
+    addr.classList.remove("hidden");
+
+  } catch (err) {
+    console.error(err);
+    alert("Wallet connection cancelled");
+  }
 }
 
 function selectMood(mood, event) {
@@ -112,6 +158,11 @@ function showSuccess() {
     document.querySelectorAll(".mood-btn").forEach(btn =>
       btn.classList.remove("selected")
     );
+  }, 2500);
+}
+
+init();
+
   }, 2500);
 }
 
