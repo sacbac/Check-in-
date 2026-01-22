@@ -7,19 +7,20 @@
   "miniapp": {
     "version": "1",
     "name": "Daily Check-In NFT",
-    "homeUrl": "https://your-domain.com",
-    "iconUrl": "https://your-domain.com/icon.png",
-    "splashImageUrl": "https://your-domain.com/splash.png",
-    "splashBackgroundColor": "#000000",
-    "subtitle": "Mint an NFT daily!",
-    "description": "Track your mood and mint a unique NFT every day.",
-    "screenshotUrls": [
-      "https://your-domain.com/screenshot1.png",
-      "https://your-domain.com/screenshot2.png"
-    ],
+    "subtitle": "Mint your mood on Base",
+    "description": "Check in daily, choose your mood, and mint a unique NFT on Base.",
+    "tagline": "Your mood, onchain",
     "primaryCategory": "productivity",
-    "tags": ["mood", "checkin", "nft"],
-    "heroImageUrl": "https://your-domain.com/og.png",
-    "tagline": "Make your mood onchain"
+    "tags": ["base", "nft", "checkin", "mood"],
+    "homeUrl": "https://check-in-amber-pi.vercel.app/",
+    "iconUrl": "https://check-in-amber-pi.vercel.app/assets/icon.png",
+    "splashImageUrl": "https://check-in-amber-pi.vercel.app/assets/splash.png",
+    "splashBackgroundColor": "#020617",
+    "heroImageUrl": "https://check-in-amber-pi.vercel.app/assets/hero.png",
+    "screenshotUrls": [
+      "https://check-in-amber-pi.vercel.app/assets/screen1.png",
+      "https://check-in-amber-pi.vercel.app/assets/screen2.png"
+    ]
   }
 }
+
