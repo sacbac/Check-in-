@@ -1,14 +1,15 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta name="base:app_id" content="696fbe3cc0ab25addaaaf802" />
   <meta charset="UTF-8" />
+
+  <!-- ✅ ONLY ONE Base App ID -->
+  <meta name="base:app_id" content="696fbe3cc0ab25addaaaf802" />
+
   <meta
     name="viewport"
     content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no"
   />
-
-  <meta name="base:app_id" content="695f88a93ee38216e9af4d08" />
 
   <title>Daily Check-In</title>
 
@@ -17,6 +18,12 @@
 
   <!-- ethers.js -->
   <script src="https://cdn.jsdelivr.net/npm/ethers@6.9.0/dist/ethers.umd.min.js"></script>
+
+  <!-- ✅ Base Mini App SDK (CDN SAFE) -->
+  <script type="module">
+    import { sdk } from "https://esm.sh/@farcaster/miniapp-sdk";
+    window.baseSdk = sdk;
+  </script>
 </head>
 
 <body>
@@ -35,18 +42,10 @@
         <div class="section-title">How are you feeling today?</div>
 
         <div class="moods">
-          <button class="mood-btn" onclick="selectMood('Happy', event)">
-            😊 <span>Happy</span>
-          </button>
-          <button class="mood-btn" onclick="selectMood('Calm', event)">
-            😌 <span>Calm</span>
-          </button>
-          <button class="mood-btn" onclick="selectMood('Focused', event)">
-            🎯 <span>Focused</span>
-          </button>
-          <button class="mood-btn" onclick="selectMood('Tired', event)">
-            😴 <span>Tired</span>
-          </button>
+          <button class="mood-btn" onclick="selectMood('Happy', event)">😊 <span>Happy</span></button>
+          <button class="mood-btn" onclick="selectMood('Calm', event)">😌 <span>Calm</span></button>
+          <button class="mood-btn" onclick="selectMood('Focused', event)">🎯 <span>Focused</span></button>
+          <button class="mood-btn" onclick="selectMood('Tired', event)">😴 <span>Tired</span></button>
         </div>
 
         <button id="checkInBtn" onclick="submitCheckIn()">
