@@ -1,0 +1,7 @@
+{
+  "name": "Daily Check-In NFT",
+  "description": "Daily emotional check-in NFT on Base",
+  "attributes": [
+    { "trait_type": "Type", "value": "Daily Check-In" }
+  ]
+}
