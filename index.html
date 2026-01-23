@@ -26,7 +26,6 @@
       <h1>Daily Check-In</h1>
       <p id="todayDate"></p>
 
-      <!-- Only shown in browser -->
       <button id="connectWalletBtn" class="primary-btn hidden">
         🔐 Connect Wallet
       </button>
@@ -36,13 +35,13 @@
       <h3>How are you feeling?</h3>
 
       <div class="moods">
-        <button onclick="selectMood('Happy', event)">😊 Happy</button>
-        <button onclick="selectMood('Calm', event)">😌 Calm</button>
-        <button onclick="selectMood('Focused', event)">🎯 Focused</button>
-        <button onclick="selectMood('Tired', event)">😴 Tired</button>
+        <button data-mood="Happy">😊 Happy</button>
+        <button data-mood="Calm">😌 Calm</button>
+        <button data-mood="Focused">🎯 Focused</button>
+        <button data-mood="Tired">😴 Tired</button>
       </div>
 
-      <button class="primary-btn" onclick="submitCheckIn()">
+      <button id="mintBtn" class="primary-btn">
         ✨ Check-In & Mint NFT
       </button>
 
