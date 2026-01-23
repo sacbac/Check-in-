@@ -3,7 +3,6 @@ let userAccount = null;
 
 // OLD CONTRACT
 const CONTRACT_ADDRESS = "0x730f889F90b0DbCB295704d05f8CD96c5514b1F5";
-
 const ABI = [
   "function mintCheckInNFT(address to, string tokenURI)"
 ];
@@ -12,45 +11,52 @@ function isBaseApp() {
   return typeof window.baseSdk !== "undefined";
 }
 
-// -------- INIT --------
+/* ---------- INIT ---------- */
+window.addEventListener("DOMContentLoaded", init);
 
 async function init() {
   document.getElementById("todayDate").innerText =
     new Date().toDateString();
 
+  // Mood buttons
+  document.querySelectorAll(".moods button").forEach(btn => {
+    btn.addEventListener("click", () => {
+      selectedMood = btn.dataset.mood;
+      document.querySelectorAll(".moods button")
+        .forEach(b => b.classList.remove("selected"));
+      btn.classList.add("selected");
+    });
+  });
+
+  // Mint button
+  document.getElementById("mintBtn")
+    .addEventListener("click", submitCheckIn);
+
+  // Wallet logic
   if (isBaseApp()) {
-    // ✅ Base Mini App: wallet is implicit
-    const context = await window.baseSdk.context;
-    userAccount = context?.user?.custodyAddress;
-
-    if (userAccount) {
-      showWallet(userAccount);
-    }
+    try {
+      const ctx = await window.baseSdk.context;
+      userAccount = ctx?.user?.custodyAddress;
+      if (userAccount) showWallet(userAccount);
+    } catch {}
   } else {
-    // Browser: show connect button
-    document
-      .getElementById("connectWalletBtn")
-      .classList.remove("hidden");
-
-    document
-      .getElementById("connectWalletBtn")
-      .addEventListener("click", connectBrowserWallet);
+    const btn = document.getElementById("connectWalletBtn");
+    btn.classList.remove("hidden");
+    btn.addEventListener("click", connectBrowserWallet);
   }
 }
 
-// -------- UI --------
-
+/* ---------- UI ---------- */
 function showWallet(addr) {
-  document.getElementById("walletAddress").innerText =
-    addr.slice(0, 6) + "..." + addr.slice(-4);
-  document.getElementById("walletAddress").classList.remove("hidden");
+  const el = document.getElementById("walletAddress");
+  el.innerText = addr.slice(0, 6) + "..." + addr.slice(-4);
+  el.classList.remove("hidden");
 }
 
-// -------- BROWSER WALLET --------
-
+/* ---------- BROWSER WALLET ---------- */
 async function connectBrowserWallet() {
   if (!window.ethereum) {
-    alert("Install MetaMask");
+    alert("Please install MetaMask");
     return;
   }
 
@@ -60,19 +66,17 @@ async function connectBrowserWallet() {
 
   userAccount = accounts[0];
   showWallet(userAccount);
-  document.getElementById("connectWalletBtn").innerText = "✅ Connected";
 }
 
-// -------- MINT --------
-
+/* ---------- MINT ---------- */
 async function submitCheckIn() {
   if (!userAccount) {
-    alert("Wallet not available");
+    alert("Wallet not connected");
     return;
   }
 
   if (!selectedMood) {
-    alert("Select a mood");
+    alert("Please select a mood");
     return;
   }
 
@@ -80,7 +84,7 @@ async function submitCheckIn() {
     "https://check-in-amber-pi.vercel.app/metadata.json";
 
   if (isBaseApp()) {
-    // ✅ Base Mini App transaction
+    // Base Mini App tx
     const iface = new ethers.Interface(ABI);
     const data = iface.encodeFunctionData(
       "mintCheckInNFT",
@@ -93,9 +97,8 @@ async function submitCheckIn() {
     });
 
     alert("NFT minted 🎉");
-
   } else {
-    // ✅ Browser MetaMask
+    // Browser MetaMask
     const provider = new ethers.BrowserProvider(window.ethereum);
     const signer = await provider.getSigner();
     const contract = new ethers.Contract(CONTRACT_ADDRESS, ABI, signer);
@@ -106,14 +109,3 @@ async function submitCheckIn() {
     alert("NFT minted 🎉");
   }
 }
-
-// -------- MOODS --------
-
-function selectMood(mood, e) {
-  selectedMood = mood;
-  document.querySelectorAll(".moods button")
-    .forEach(b => b.classList.remove("selected"));
-  e.target.classList.add("selected");
-}
-
-init();
