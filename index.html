@@ -2,19 +2,17 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-
-  <!-- Base Mini App ID -->
   <meta name="base:app_id" content="696fbe3cc0ab25addaaaf802" />
-
   <meta name="viewport" content="width=device-width, initial-scale=1" />
+
   <title>Daily Check-In</title>
 
   <link rel="stylesheet" href="style.css" />
 
-  <!-- ethers -->
+  <!-- ethers ONLY for browser MetaMask -->
   <script src="https://cdn.jsdelivr.net/npm/ethers@6.9.0/dist/ethers.umd.min.js"></script>
 
-  <!-- Base Mini App SDK (ONLY for ready signal) -->
+  <!-- Base Mini App SDK -->
   <script type="module">
     import { sdk } from "https://esm.sh/@farcaster/miniapp-sdk";
     window.baseSdk = sdk;
@@ -26,32 +24,22 @@
   <div class="container">
     <div class="card">
       <h1>Daily Check-In</h1>
-      <p class="subtitle" id="todayDate"></p>
+      <p id="todayDate"></p>
 
-      <button id="connectWalletBtn" class="primary-btn">
-        🔐 Connect Wallet
-      </button>
-      <p id="walletAddress" class="wallet hidden"></p>
-
-      <h3>How are you feeling?</h3>
+      <button id="connectWalletBtn">🔐 Connect Wallet</button>
+      <p id="walletAddress" class="hidden"></p>
 
       <div class="moods">
-        <button class="mood-btn" onclick="selectMood('Happy', event)">😊 Happy</button>
-        <button class="mood-btn" onclick="selectMood('Calm', event)">😌 Calm</button>
-        <button class="mood-btn" onclick="selectMood('Focused', event)">🎯 Focused</button>
-        <button class="mood-btn" onclick="selectMood('Tired', event)">😴 Tired</button>
+        <button onclick="selectMood('Happy', event)">😊 Happy</button>
+        <button onclick="selectMood('Calm', event)">😌 Calm</button>
+        <button onclick="selectMood('Focused', event)">🎯 Focused</button>
+        <button onclick="selectMood('Tired', event)">😴 Tired</button>
       </div>
 
-      <button id="checkInBtn" class="primary-btn" onclick="submitCheckIn()">
-        ✨ Check-In & Mint NFT
-      </button>
-
-      <div id="loading" class="hidden">Minting… ⏳</div>
-      <div id="success" class="hidden">✅ NFT Minted! Come back tomorrow 🌱</div>
+      <button onclick="submitCheckIn()">✨ Check-In & Mint</button>
 
       <p class="note">
-        This transaction only mints an NFT to your wallet.<br />
-        No approvals. No token access.
+        Only mints an NFT. No approvals. No token access.
       </p>
     </div>
   </div>
