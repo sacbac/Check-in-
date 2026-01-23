@@ -14,10 +14,11 @@
   <!-- ethers -->
   <script src="https://cdn.jsdelivr.net/npm/ethers@6.9.0/dist/ethers.umd.min.js"></script>
 
-  <!-- Base Mini App SDK -->
+  <!-- Base Mini App SDK (ONLY for ready signal) -->
   <script type="module">
     import { sdk } from "https://esm.sh/@farcaster/miniapp-sdk";
     window.baseSdk = sdk;
+    sdk.actions.ready().catch(() => {});
   </script>
 </head>
 
