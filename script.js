@@ -1,30 +1,16 @@
-import { sdk } from "@farcaster/miniapp-sdk";
-
-async function baseReady() {
-  try {
-    await sdk.actions.ready();
-    console.log("Mini App ready in Base client");
-  } catch (e) {
-    console.warn("Not in Mini App environment");
-  }
-}
-
-baseReady();
-
 let selectedMood = null;
 let userAccount = null;
+let rawProvider = null;
 
 // ✅ Your Base Mainnet contract
 const CONTRACT_ADDRESS = "0x730f889F90b0DbCB295704d05f8CD96c5514b1F5";
-
-// Base Mainnet
-const BASE_CHAIN_ID = "0x2105";
+const BASE_CHAIN_ID_HEX = "0x2105";
 
 const CONTRACT_ABI = [
   "function mintCheckInNFT(address to, string tokenURI)"
 ];
 
-function init() {
+async function init() {
   document.getElementById("todayDate").textContent =
     new Date().toLocaleDateString("en-US", {
       weekday: "long",
@@ -35,29 +21,51 @@ function init() {
   document
     .getElementById("connectWalletBtn")
     .addEventListener("click", connectWallet);
+
+  // ✅ Tell Base Mini App we are ready
+  if (window.baseSdk?.actions?.ready) {
+    try {
+      await window.baseSdk.actions.ready();
+    } catch {}
+  }
 }
 
-/* STEP 1: CONNECT WALLET */
-async function connectWallet() {
-  if (!window.ethereum) {
-    alert("MetaMask not detected. Open in MetaMask browser.");
-    return;
+/* 🔑 GET ETH PROVIDER (BASE MINI APP OR METAMASK) */
+async function getEthereumProvider() {
+  // ✅ Base Mini App wallet
+  if (window.baseSdk?.wallet?.getEthereumProvider) {
+    return await window.baseSdk.wallet.getEthereumProvider();
   }
 
+  // ✅ Normal browser MetaMask
+  if (window.ethereum) {
+    return window.ethereum;
+  }
+
+  throw new Error("No Ethereum wallet found");
+}
+
+/* 🔌 CONNECT WALLET */
+async function connectWallet() {
   try {
-    // ✅ First request accounts
-    const accounts = await window.ethereum.request({
+    rawProvider = await getEthereumProvider();
+
+    const accounts = await rawProvider.request({
       method: "eth_requestAccounts"
     });
 
     userAccount = accounts[0];
 
-    // ✅ Then ensure Base network
-    await ensureBaseNetwork();
+    // 🔁 Switch to Base (safe)
+    try {
+      await rawProvider.request({
+        method: "wallet_switchEthereumChain",
+        params: [{ chainId: BASE_CHAIN_ID_HEX }]
+      });
+    } catch {}
 
-    // ✅ Update UI
     document.getElementById("connectWalletBtn").textContent =
-      "✅ Connected (Base)";
+      "✅ Wallet Connected";
 
     const addr = document.getElementById("walletAddress");
     addr.textContent =
@@ -65,38 +73,8 @@ async function connectWallet() {
     addr.classList.remove("hidden");
 
   } catch (err) {
-    console.error("Wallet connect error:", err);
-    alert("Wallet connection cancelled or failed");
-  }
-}
-
-/* STEP 2: ENSURE BASE NETWORK */
-async function ensureBaseNetwork() {
-  try {
-    await window.ethereum.request({
-      method: "wallet_switchEthereumChain",
-      params: [{ chainId: BASE_CHAIN_ID }]
-    });
-  } catch (err) {
-    // Chain not added
-    if (err.code === 4902) {
-      await window.ethereum.request({
-        method: "wallet_addEthereumChain",
-        params: [{
-          chainId: BASE_CHAIN_ID,
-          chainName: "Base Mainnet",
-          nativeCurrency: {
-            name: "Ethereum",
-            symbol: "ETH",
-            decimals: 18
-          },
-          rpcUrls: ["https://mainnet.base.org"],
-          blockExplorerUrls: ["https://basescan.org"]
-        }]
-      });
-    } else {
-      throw err;
-    }
+    console.error(err);
+    alert("Wallet connection failed");
   }
 }
 
@@ -108,6 +86,7 @@ function selectMood(mood, event) {
   event.currentTarget.classList.add("selected");
 }
 
+/* 🪙 MINT NFT */
 async function submitCheckIn() {
   if (!userAccount) return alert("Connect wallet first");
   if (!selectedMood) return alert("Select a mood");
@@ -118,11 +97,11 @@ async function submitCheckIn() {
     await mintNFT();
     showSuccess();
   } catch (err) {
-    if (err.reason?.includes("Already minted")) {
-      alert("You already checked in today 🌙");
+    if (err?.reason?.includes("Already")) {
+      alert("Already minted today 🌙");
     } else {
       console.error(err);
-      alert("Transaction failed");
+      alert("Mint failed");
     }
   }
 
@@ -130,7 +109,7 @@ async function submitCheckIn() {
 }
 
 async function mintNFT() {
-  const provider = new ethers.BrowserProvider(window.ethereum);
+  const provider = new ethers.BrowserProvider(rawProvider);
   const signer = await provider.getSigner();
 
   const contract = new ethers.Contract(
@@ -156,6 +135,7 @@ async function mintNFT() {
   await tx.wait();
 }
 
+/* 🎛 UI HELPERS */
 function toggleLoading(state) {
   document.getElementById("checkInForm").classList.toggle("hidden", state);
   document.getElementById("loadingState").classList.toggle("hidden", !state);
@@ -176,4 +156,3 @@ function showSuccess() {
 }
 
 init();
-
