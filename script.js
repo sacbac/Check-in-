@@ -3,88 +3,103 @@ let userAccount = null;
 
 // OLD CONTRACT
 const CONTRACT_ADDRESS = "0x730f889F90b0DbCB295704d05f8CD96c5514b1F5";
-const BASE_CHAIN_ID = "0x2105";
 
 const ABI = [
   "function mintCheckInNFT(address to, string tokenURI)"
 ];
 
-// ---------- UTILS ----------
-
 function isBaseApp() {
-  return !!window.baseSdk;
+  return typeof window.baseSdk !== "undefined";
 }
 
-// ---------- CONNECT ----------
+// -------- INIT --------
 
-async function connectWallet() {
+async function init() {
+  document.getElementById("todayDate").innerText =
+    new Date().toDateString();
+
   if (isBaseApp()) {
-    // ✅ BASE MINI APP WALLET
-    try {
-      const accounts = await window.baseSdk.wallet.requestAccounts();
-      userAccount = accounts[0];
+    // ✅ Base Mini App: wallet is implicit
+    const context = await window.baseSdk.context;
+    userAccount = context?.user?.custodyAddress;
 
-      document.getElementById("walletAddress").textContent =
-        userAccount.slice(0, 6) + "..." + userAccount.slice(-4);
-      document.getElementById("walletAddress").classList.remove("hidden");
-      document.getElementById("connectWalletBtn").innerText = "✅ Connected";
-
-    } catch (e) {
-      alert("Base wallet connection cancelled");
+    if (userAccount) {
+      showWallet(userAccount);
     }
-
   } else {
-    // ✅ NORMAL BROWSER (METAMASK)
-    if (!window.ethereum) {
-      alert("Install MetaMask");
-      return;
-    }
+    // Browser: show connect button
+    document
+      .getElementById("connectWalletBtn")
+      .classList.remove("hidden");
 
-    const accounts = await window.ethereum.request({
-      method: "eth_requestAccounts"
-    });
-
-    userAccount = accounts[0];
-    document.getElementById("walletAddress").textContent =
-      userAccount.slice(0, 6) + "..." + userAccount.slice(-4);
-    document.getElementById("walletAddress").classList.remove("hidden");
-    document.getElementById("connectWalletBtn").innerText = "✅ Connected";
+    document
+      .getElementById("connectWalletBtn")
+      .addEventListener("click", connectBrowserWallet);
   }
 }
 
-// ---------- UI ----------
+// -------- UI --------
 
-function selectMood(mood, e) {
-  selectedMood = mood;
-  document.querySelectorAll("button")
-    .forEach(b => b.classList.remove("selected"));
-  e.target.classList.add("selected");
+function showWallet(addr) {
+  document.getElementById("walletAddress").innerText =
+    addr.slice(0, 6) + "..." + addr.slice(-4);
+  document.getElementById("walletAddress").classList.remove("hidden");
 }
 
-// ---------- MINT ----------
+// -------- BROWSER WALLET --------
+
+async function connectBrowserWallet() {
+  if (!window.ethereum) {
+    alert("Install MetaMask");
+    return;
+  }
+
+  const accounts = await window.ethereum.request({
+    method: "eth_requestAccounts"
+  });
+
+  userAccount = accounts[0];
+  showWallet(userAccount);
+  document.getElementById("connectWalletBtn").innerText = "✅ Connected";
+}
+
+// -------- MINT --------
 
 async function submitCheckIn() {
-  if (!userAccount) return alert("Connect wallet");
-  if (!selectedMood) return alert("Select mood");
+  if (!userAccount) {
+    alert("Wallet not available");
+    return;
+  }
+
+  if (!selectedMood) {
+    alert("Select a mood");
+    return;
+  }
 
   const tokenURI =
     "https://check-in-amber-pi.vercel.app/metadata.json";
 
   if (isBaseApp()) {
-    // ✅ BASE MINI APP TRANSACTION
+    // ✅ Base Mini App transaction
+    const iface = new ethers.Interface(ABI);
+    const data = iface.encodeFunctionData(
+      "mintCheckInNFT",
+      [userAccount, tokenURI]
+    );
+
     await window.baseSdk.wallet.sendTransaction({
       to: CONTRACT_ADDRESS,
-      data: encodeMint(userAccount, tokenURI)
+      data
     });
 
     alert("NFT minted 🎉");
 
   } else {
-    // ✅ METAMASK TRANSACTION
+    // ✅ Browser MetaMask
     const provider = new ethers.BrowserProvider(window.ethereum);
     const signer = await provider.getSigner();
-
     const contract = new ethers.Contract(CONTRACT_ADDRESS, ABI, signer);
+
     const tx = await contract.mintCheckInNFT(userAccount, tokenURI);
     await tx.wait();
 
@@ -92,20 +107,13 @@ async function submitCheckIn() {
   }
 }
 
-// ---------- ABI ENCODER ----------
+// -------- MOODS --------
 
-function encodeMint(to, uri) {
-  const iface = new ethers.Interface(ABI);
-  return iface.encodeFunctionData(
-    "mintCheckInNFT",
-    [to, uri]
-  );
+function selectMood(mood, e) {
+  selectedMood = mood;
+  document.querySelectorAll(".moods button")
+    .forEach(b => b.classList.remove("selected"));
+  e.target.classList.add("selected");
 }
 
-// ---------- INIT ----------
-
-document.getElementById("connectWalletBtn")
-  .addEventListener("click", connectWallet);
-
-document.getElementById("todayDate").innerText =
-  new Date().toDateString();
+init();
