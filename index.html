@@ -9,7 +9,7 @@
 
   <link rel="stylesheet" href="style.css" />
 
-  <!-- ethers ONLY for browser MetaMask -->
+  <!-- ethers (browser only) -->
   <script src="https://cdn.jsdelivr.net/npm/ethers@6.9.0/dist/ethers.umd.min.js"></script>
 
   <!-- Base Mini App SDK -->
@@ -26,8 +26,14 @@
       <h1>Daily Check-In</h1>
       <p id="todayDate"></p>
 
-      <button id="connectWalletBtn">🔐 Connect Wallet</button>
-      <p id="walletAddress" class="hidden"></p>
+      <!-- Only shown in browser -->
+      <button id="connectWalletBtn" class="primary-btn hidden">
+        🔐 Connect Wallet
+      </button>
+
+      <p id="walletAddress" class="wallet hidden"></p>
+
+      <h3>How are you feeling?</h3>
 
       <div class="moods">
         <button onclick="selectMood('Happy', event)">😊 Happy</button>
@@ -36,10 +42,13 @@
         <button onclick="selectMood('Tired', event)">😴 Tired</button>
       </div>
 
-      <button onclick="submitCheckIn()">✨ Check-In & Mint</button>
+      <button class="primary-btn" onclick="submitCheckIn()">
+        ✨ Check-In & Mint NFT
+      </button>
 
       <p class="note">
-        Only mints an NFT. No approvals. No token access.
+        This only mints an NFT to your wallet.<br />
+        No approvals. No token access.
       </p>
     </div>
   </div>
