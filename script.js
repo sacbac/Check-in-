@@ -1,14 +1,16 @@
 let selectedMood = null;
 let userAccount = null;
 
-// OLD CONTRACT
+// OLD CONTRACT (as requested)
 const CONTRACT_ADDRESS = "0x730f889F90b0DbCB295704d05f8CD96c5514b1F5";
+
 const ABI = [
   "function mintCheckInNFT(address to, string tokenURI)"
 ];
 
+// ✅ OFFICIAL Base Mini App detection
 function isBaseApp() {
-  return typeof window.baseSdk !== "undefined";
+  return Boolean(window.__BASE_MINI_APP__);
 }
 
 /* ---------- INIT ---------- */
@@ -18,7 +20,7 @@ async function init() {
   document.getElementById("todayDate").innerText =
     new Date().toDateString();
 
-  // Mood buttons
+  // Mood selection
   document.querySelectorAll(".moods button").forEach(btn => {
     btn.addEventListener("click", () => {
       selectedMood = btn.dataset.mood;
@@ -28,18 +30,22 @@ async function init() {
     });
   });
 
-  // Mint button
-  document.getElementById("mintBtn")
+  document
+    .getElementById("mintBtn")
     .addEventListener("click", submitCheckIn);
 
-  // Wallet logic
+  // Wallet handling
   if (isBaseApp()) {
+    // ✅ Base Mini App: wallet is implicit
     try {
       const ctx = await window.baseSdk.context;
       userAccount = ctx?.user?.custodyAddress;
       if (userAccount) showWallet(userAccount);
-    } catch {}
+    } catch {
+      console.warn("Base context unavailable");
+    }
   } else {
+    // ✅ Browser: show connect button
     const btn = document.getElementById("connectWalletBtn");
     btn.classList.remove("hidden");
     btn.addEventListener("click", connectBrowserWallet);
@@ -84,7 +90,7 @@ async function submitCheckIn() {
     "https://check-in-amber-pi.vercel.app/metadata.json";
 
   if (isBaseApp()) {
-    // Base Mini App tx
+    // ✅ Base Mini App transaction
     const iface = new ethers.Interface(ABI);
     const data = iface.encodeFunctionData(
       "mintCheckInNFT",
@@ -97,8 +103,9 @@ async function submitCheckIn() {
     });
 
     alert("NFT minted 🎉");
+
   } else {
-    // Browser MetaMask
+    // ✅ Browser MetaMask transaction
     const provider = new ethers.BrowserProvider(window.ethereum);
     const signer = await provider.getSigner();
     const contract = new ethers.Contract(CONTRACT_ADDRESS, ABI, signer);
